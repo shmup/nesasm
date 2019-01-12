@@ -14,9 +14,8 @@ See [`usage.txt`](https://raw.githubusercontent.com/camsaul/nesasm/master/usage.
 ###### Credits
 
 Original source, by [bunnyboy](http://nintendoage.com/index.cfm?FuseAction=Users.Home&User=bunnyboy), is [available here](http://www.nespowerpak.com/nesasm/).
-The only modifications I (@camsaul) made were inclusion of the `Makefile`, which was adapted from the one included with [MagicKit](http://www.magicengine.com/mkit/), and the text files,
-which were found in various places in the aforementioned sites and by lots of research/searching on my part.
-
+The only modifications I ([@camsaul](https://github.com/camsaul)) made were inclusion of the `Makefile`, which was adapted from the one included with [MagicKit](http://www.magicengine.com/mkit/), the text files,
+which were found in various places in the aforementioned sites and by lots of research/searching on my part, and the addition of the resources list below.
 
 ###### Resources
 
