@@ -1,32 +1,20 @@
 RM       = rm -f
 CC       = gcc
-
 CFLAGS   = -O4 -Wall
-
-OBJS     = main.o input.o assemble.o expr.o code.o command.o\
-         macro.o func.o proc.o symbol.o pcx.o output.o crc.o\
-         pce.o map.o mml.o nes.o
-
 EXEDIR   = ..
-
 TARGNES  = $(EXEDIR)/nesasm
-
-#
-#
+OBJS     = assemble.o code.o command.o crc.o expr.o func.o\
+	   input.o macro.o main.o map.o mml.o nes.o output.o\
+	   pcx.o pce.o proc.o symbol.o
 
 all: $(TARGNES)
 default: $(TARGNES)
-
-# CLEAN
-#
 
 clean:
 	$(RM) *.o
 	$(RM) $(EXEDIR)/nesasm
 
 # ASSEMBLER
-#
-
 $(OBJS)  : defs.h externs.h protos.h
 main.o   : inst.h vars.h
 expr.o   : expr.h
@@ -36,8 +24,6 @@ nes.o    : nes.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 # EXE
-#
-
 $(TARGNES) : $(OBJS)
 	$(CC) -o $(TARGNES)  $(OBJS)
 
