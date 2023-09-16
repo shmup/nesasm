@@ -1,0 +1,20 @@
+@@@  @@@ @@@@@@@@  @@@@@@  @@@@@@   @@@@@@ @@@@@@@@@@
+@@!@!@@@ @@!      !@@     @@!  @@@ !@@     @@! @@! @@!
+@!@@!!@! @!!!:!    !@@!!  @!@!@!@!  !@@!!  @!! !!@ @!@
+!!:  !!! !!:          !:! !!:  !!!     !:! !!:     !!:
+::    :  : :: ::: ::.: :   :   : : ::.: :   :      :
+
+NESasm assembler for NES 6502 assembly, version 3.1
+
+
+INSTALL
+    make && make install
+
+
+USAGE
+    see usage.txt
+
+
+CREDITS
+    github author  https://github.com/camsaul/nesasm
+        og author  http://www.nespowerpak.com/nesasm
