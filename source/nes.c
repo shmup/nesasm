@@ -6,17 +6,16 @@
 #include "nes.h"
 
 /* locals */
-static int ines_prg;		/* number of prg banks */
-static int ines_chr;		/* number of character banks */
-static int ines_mapper[2];	/* rom mapper type */
-static struct INES {		/* INES rom header */
-	unsigned char id[4];
-	unsigned char prg;
-	unsigned char chr;
-	unsigned char mapper[2];
-	unsigned char unused[8];
+static int ines_prg;       /* number of prg banks */
+static int ines_chr;       /* number of character banks */
+static int ines_mapper[2]; /* rom mapper type */
+static struct INES {       /* INES rom header */
+  unsigned char id[4];
+  unsigned char prg;
+  unsigned char chr;
+  unsigned char mapper[2];
+  unsigned char unused[8];
 } header;
-
 
 /* ----
  * write_header()
@@ -24,24 +23,21 @@ static struct INES {		/* INES rom header */
  * generate and write rom header
  */
 
-void
-nes_write_header(FILE *f, int banks)
-{
-	/* setup INES header */
-	memset(&header, 0, sizeof(header));
-	header.id[0] = 'N';
-	header.id[1] = 'E';
-	header.id[2] = 'S';
-	header.id[3] = 26;
-	header.prg = ines_prg;
-	header.chr = ines_chr;
-	header.mapper[0] = ines_mapper[0];
-	header.mapper[1] = ines_mapper[1];
+void nes_write_header(FILE *f, int banks) {
+  /* setup INES header */
+  memset(&header, 0, sizeof(header));
+  header.id[0] = 'N';
+  header.id[1] = 'E';
+  header.id[2] = 'S';
+  header.id[3] = 26;
+  header.prg = ines_prg;
+  header.chr = ines_chr;
+  header.mapper[0] = ines_mapper[0];
+  header.mapper[1] = ines_mapper[1];
 
-	/* write */
-	fwrite(&header, sizeof(header), 1, f);
+  /* write */
+  fwrite(&header, sizeof(header), 1, f);
 }
-
 
 /* ----
  * pack_8x8_tile()
@@ -49,77 +45,75 @@ nes_write_header(FILE *f, int banks)
  * encode a 8x8 tile for the NES
  */
 
-int
-nes_pack_8x8_tile(unsigned char *buffer, void *data, int line_offset, int format)
-{
-	int i, j;
-	int cnt, err;
-	unsigned int   pixel;
-	unsigned char *ptr;
-	unsigned int  *packed;
+int nes_pack_8x8_tile(unsigned char *buffer, void *data, int line_offset,
+                      int format) {
+  int i, j;
+  int cnt, err;
+  unsigned int pixel;
+  unsigned char *ptr;
+  unsigned int *packed;
 
-	/* pack the tile only in the last pass */
-	if (pass != LAST_PASS)
-		return (16);
+  /* pack the tile only in the last pass */
+  if (pass != LAST_PASS)
+    return (16);
 
-	/* clear buffer */
-	memset(buffer, 0, 16);
+  /* clear buffer */
+  memset(buffer, 0, 16);
 
-	/* encode the tile */
-	switch (format) {
-	case CHUNKY_TILE:
-		/* 8-bit chunky format */
-		cnt = 0;
-		ptr = data;
+  /* encode the tile */
+  switch (format) {
+  case CHUNKY_TILE:
+    /* 8-bit chunky format */
+    cnt = 0;
+    ptr = data;
 
-		for (i = 0; i < 8; i++) {
-			for (j = 0; j < 8; j++) {
-				pixel = ptr[j ^ 0x07];
-				buffer[cnt]   |= (pixel & 0x01) ? (1 << j) : 0;
-				buffer[cnt+8] |= (pixel & 0x02) ? (1 << j) : 0;
-			}				
-			ptr += line_offset;
-			cnt += 1;
-		}
-		break;
+    for (i = 0; i < 8; i++) {
+      for (j = 0; j < 8; j++) {
+        pixel = ptr[j ^ 0x07];
+        buffer[cnt] |= (pixel & 0x01) ? (1 << j) : 0;
+        buffer[cnt + 8] |= (pixel & 0x02) ? (1 << j) : 0;
+      }
+      ptr += line_offset;
+      cnt += 1;
+    }
+    break;
 
-	case PACKED_TILE:
-		/* 4-bit packed format */
-		cnt = 0;
-		err = 0;
-		packed = data;
-	
-		for (i = 0; i < 8; i++) {
-			pixel = packed[i];
-	
-			for (j = 0; j < 8; j++) {
-				/* check for errors */
-				if (pixel & 0x0C)
-					err++;
+  case PACKED_TILE:
+    /* 4-bit packed format */
+    cnt = 0;
+    err = 0;
+    packed = data;
 
-				/* convert the tile */
-				buffer[cnt]   |= (pixel & 0x01) ? (1 << j) : 0;
-				buffer[cnt+8] |= (pixel & 0x02) ? (1 << j) : 0;
-				pixel >>= 4;
-			}
-			cnt += 1;
-		}
+    for (i = 0; i < 8; i++) {
+      pixel = packed[i];
 
-		/* error message */
-		if (err)
-			error("Incorrect pixel color index!");
-		break;
+      for (j = 0; j < 8; j++) {
+        /* check for errors */
+        if (pixel & 0x0C)
+          err++;
 
-	default:
-		/* other formats not supported */
-		error("Internal error: unsupported format passed to 'pack_8x8_tile'!");
-		break;
-	}
+        /* convert the tile */
+        buffer[cnt] |= (pixel & 0x01) ? (1 << j) : 0;
+        buffer[cnt + 8] |= (pixel & 0x02) ? (1 << j) : 0;
+        pixel >>= 4;
+      }
+      cnt += 1;
+    }
 
-	/* ok */
-	return (16);
+    /* error message */
+    if (err)
+      error("Incorrect pixel color index!");
+    break;
+
+  default:
+    /* other formats not supported */
+    error("Internal error: unsupported format passed to 'pack_8x8_tile'!");
+    break;
+  }
+
+  /* ok */
+  return (16);
 }
-
 
 /* ----
  * do_defchr()
@@ -127,43 +121,40 @@ nes_pack_8x8_tile(unsigned char *buffer, void *data, int line_offset, int format
  * .defchr pseudo
  */
 
-void
-nes_defchr(int *ip)
-{
-	unsigned char buffer[16];
-	unsigned int data[8];
-	int size;
-	int i;
+void nes_defchr(int *ip) {
+  unsigned char buffer[16];
+  unsigned int data[8];
+  int size;
+  int i;
 
-	/* define label */
-	labldef(loccnt, 1);
+  /* define label */
+  labldef(loccnt, 1);
 
-	/* output infos */
-	data_loccnt = loccnt;
-	data_size   = 3;
-	data_level  = 3;
+  /* output infos */
+  data_loccnt = loccnt;
+  data_size = 3;
+  data_level = 3;
 
-	/* get tile data */
-	for (i = 0; i < 8; i++) {
-		/* get value */
-		if (!evaluate(ip, (i < 7) ? ',' : ';'))
-			return;
+  /* get tile data */
+  for (i = 0; i < 8; i++) {
+    /* get value */
+    if (!evaluate(ip, (i < 7) ? ',' : ';'))
+      return;
 
-		/* store value */
-		data[i] = value;
-	}
+    /* store value */
+    data[i] = value;
+  }
 
-	/* encode tile */
-	size = nes_pack_8x8_tile(buffer, data, 0, PACKED_TILE);
+  /* encode tile */
+  size = nes_pack_8x8_tile(buffer, data, 0, PACKED_TILE);
 
-	/* store tile */
-	putbuffer(buffer, size);
+  /* store tile */
+  putbuffer(buffer, size);
 
-	/* output line */
-	if (pass == LAST_PASS)
-		println();
+  /* output line */
+  if (pass == LAST_PASS)
+    println();
 }
-
 
 /* ----
  * do_inesprg()
@@ -171,27 +162,22 @@ nes_defchr(int *ip)
  * .inesprg pseudo
  */
 
-void
-nes_inesprg(int *ip)
-{
-	if (!evaluate(ip, ';'))
-		return;
+void nes_inesprg(int *ip) {
+  if (!evaluate(ip, ';'))
+    return;
 
-	if ((value < 0) || (value > 64)) 
-	{
-		error("PRG bank value out of range!");
-	
-		return;
-	}
-	
-	ines_prg = value;
+  if ((value < 0) || (value > 64)) {
+    error("PRG bank value out of range!");
 
-	if (pass == LAST_PASS) 
-	{
-		println();
-	}
+    return;
+  }
+
+  ines_prg = value;
+
+  if (pass == LAST_PASS) {
+    println();
+  }
 }
-
 
 /* ----
  * do_ineschr()
@@ -199,27 +185,22 @@ nes_inesprg(int *ip)
  * .ineschr pseudo
  */
 
-void
-nes_ineschr(int *ip)
-{
-	if (!evaluate(ip, ';'))
-		return;
+void nes_ineschr(int *ip) {
+  if (!evaluate(ip, ';'))
+    return;
 
-	if ((value < 0) || (value > 64)) 
-	{
-		error("CHR bank value out of range!");
-	
-		return;
-	}
-	
-	ines_chr = value;
+  if ((value < 0) || (value > 64)) {
+    error("CHR bank value out of range!");
 
-	if (pass == LAST_PASS) 
-	{
-		println();
-	}
+    return;
+  }
+
+  ines_chr = value;
+
+  if (pass == LAST_PASS) {
+    println();
+  }
 }
-
 
 /* ----
  * do_inesmap()
@@ -227,29 +208,24 @@ nes_ineschr(int *ip)
  * .inesmap pseudo
  */
 
-void
-nes_inesmap(int *ip)
-{
-	if (!evaluate(ip, ';'))
-		return;
+void nes_inesmap(int *ip) {
+  if (!evaluate(ip, ';'))
+    return;
 
-	if ((value < 0) || (value > 255)) 
-	{
-		error("Mapper value out of range!");
-	
-		return;
-	}
-	
-	ines_mapper[0] &= 0x0F;
-	ines_mapper[0] |= (value & 0x0F) << 4;
-	ines_mapper[1]  = (value & 0xF0);
+  if ((value < 0) || (value > 255)) {
+    error("Mapper value out of range!");
 
-	if (pass == LAST_PASS) 
-	{
-		println();
-	}
+    return;
+  }
+
+  ines_mapper[0] &= 0x0F;
+  ines_mapper[0] |= (value & 0x0F) << 4;
+  ines_mapper[1] = (value & 0xF0);
+
+  if (pass == LAST_PASS) {
+    println();
+  }
 }
-
 
 /* ----
  * do_inesmir()
@@ -257,25 +233,20 @@ nes_inesmap(int *ip)
  * .ines.mirror pseudo
  */
 
-void
-nes_inesmir(int *ip)
-{
-	if (!evaluate(ip, ';'))
-		return;
+void nes_inesmir(int *ip) {
+  if (!evaluate(ip, ';'))
+    return;
 
-	if ((value < 0) || (value > 15)) 
-	{
-		error("Mirror value out of range!");
-	
-		return;
-	}
-	
-	ines_mapper[0] &= 0xF0;
-	ines_mapper[0] |= (value  & 0x0F);
+  if ((value < 0) || (value > 15)) {
+    error("Mirror value out of range!");
 
-	if (pass == LAST_PASS) 
-	{
-		println();
-	}
+    return;
+  }
+
+  ines_mapper[0] &= 0xF0;
+  ines_mapper[0] |= (value & 0x0F);
+
+  if (pass == LAST_PASS) {
+    println();
+  }
 }
-
